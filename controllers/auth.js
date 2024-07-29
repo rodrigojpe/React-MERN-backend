@@ -95,13 +95,7 @@ const loginUsuario = async(req, res = response) => {
         })
     }
 
-
-    res.json({
-        msg: 'login',
-        ok: true,
-        email, password
-
-    });
+   
 }
 
 const renewToken = async(req, res = response) => {
