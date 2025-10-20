@@ -5,7 +5,7 @@ const { check } = require('express-validator');
 const { validarCampos } = require('../middlewares/validar-campos');
 const { validaJWT } = require('../middlewares/valida-jwt');
 
-const { crearUsuario, loginUsuario, renewToken } = require('../controllers/auth');
+const { crearUsuario, loginUsuario, renewToken, forgotPassword, resetPassword } = require('../controllers/auth');
 
 
 router.post('/new',
@@ -24,5 +24,16 @@ router.post('/',[
 ], loginUsuario);
 
 router.get('/renew',validaJWT, renewToken);
+
+router.post('/forgot-password',[
+    check('email', 'El email es obligatorio').isEmail(),
+    validarCampos
+], forgotPassword);
+
+router.post('/reset-password',[
+    check('token', 'El token es obligatorio').not().isEmpty(),
+    check('newPassword', 'La nueva contraseña debe tener mínimo 6 caracteres').isLength({ min: 6 }),
+    validarCampos
+], resetPassword);
 
 module.exports = router;
