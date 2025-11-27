@@ -5,17 +5,17 @@ const { generarJWT } = require('../helpers/jwt');
 const { sendPasswordResetEmail } = require('../helpers/email');
 const crypto = require('crypto');
 
-const crearUsuario = async(req, res = response) => {
+const crearUsuario = async (req, res = response) => {
 
     // let usuario = new Usuario(req.body);
 
     try {
         const { email, password } = req.body;
 
-       let  usuario = await Usuario.findOne({ email });
-        console.log('query ',usuario);
-    
-        if(usuario){
+        let usuario = await Usuario.findOne({ email });
+        console.log('query ', usuario);
+
+        if (usuario) {
             return res.status(400).json({
                 ok: false,
                 msg: 'el usuario ya existe'
@@ -30,7 +30,7 @@ const crearUsuario = async(req, res = response) => {
         await usuario.save();
 
         const token = await generarJWT(usuario.id, usuario.name)
-    
+
         if (req.body) {
             res.status(201).json({
                 msg: 'registro',
@@ -40,7 +40,7 @@ const crearUsuario = async(req, res = response) => {
                 token
             });
         }
-        
+
     } catch (error) {
         res.status(500).json({
             ok: false,
@@ -51,15 +51,15 @@ const crearUsuario = async(req, res = response) => {
 
 }
 
-const loginUsuario = async(req, res = response) => {
+const loginUsuario = async (req, res = response) => {
 
-    const {  email, password } = req.body;
+    const { email, password } = req.body;
 
     try {
-        let  usuario = await Usuario.findOne({ email });
-        console.log('query ',usuario);
-    
-        if(!usuario){
+        let usuario = await Usuario.findOne({ email });
+        console.log('query ', usuario);
+
+        if (!usuario) {
             return res.status(400).json({
                 ok: false,
                 msg: 'el usuario no existe :('
@@ -69,7 +69,7 @@ const loginUsuario = async(req, res = response) => {
         // confirmar password
         const validPassword = bcrypt.compareSync(password, usuario.password);
 
-        if(!validPassword){
+        if (!validPassword) {
             return res.status(400).json({
                 ok: false,
                 msg: 'password incorrecto :('
@@ -78,7 +78,7 @@ const loginUsuario = async(req, res = response) => {
 
         // generar token 
 
-       const token = await generarJWT(usuario.id, usuario.name)
+        const token = await generarJWT(usuario.id, usuario.name)
 
 
         res.json({
@@ -88,7 +88,7 @@ const loginUsuario = async(req, res = response) => {
             name: usuario.name,
             token
         });
-        
+
     } catch (error) {
         res.status(500).json({
             ok: false,
@@ -97,10 +97,10 @@ const loginUsuario = async(req, res = response) => {
         })
     }
 
-   
+
 }
 
-const renewToken = async(req, res = response) => {
+const renewToken = async (req, res = response) => {
     const { uid, name } = req;
 
     // generar nuevo token
@@ -108,12 +108,15 @@ const renewToken = async(req, res = response) => {
 
     res.json({
         msg: 'renew',
+        ok: true,
+        uid,
+        name,
         token
 
     });
 }
 
-const forgotPassword = async(req, res = response) => {
+const forgotPassword = async (req, res = response) => {
     const { email } = req.body;
 
     try {
@@ -161,7 +164,7 @@ const forgotPassword = async(req, res = response) => {
     }
 }
 
-const resetPassword = async(req, res = response) => {
+const resetPassword = async (req, res = response) => {
     const { token, newPassword } = req.body;
 
     try {
@@ -180,11 +183,11 @@ const resetPassword = async(req, res = response) => {
         // Encriptar nueva contraseña
         const salt = bcrypt.genSaltSync();
         usuario.password = bcrypt.hashSync(newPassword, salt);
-        
+
         // Limpiar tokens de reset
         usuario.resetPasswordToken = undefined;
         usuario.resetPasswordExpires = undefined;
-        
+
         await usuario.save();
 
         res.json({

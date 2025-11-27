@@ -1,8 +1,5 @@
 const { response } = require('express');
-const Usuario = require('../models/Usuario')
-const Evento = require('../models/Events')
-const bcrypt = require('bcryptjs');
-const { generarJWT } = require('../helpers/jwt');
+const Evento = require('../models/Events');
 
 
 const getEventos = async (req, res = response) => {
@@ -15,7 +12,8 @@ const getEventos = async (req, res = response) => {
 
         res.json({
             msg: 'get events',
-            ok: true
+            ok: true,
+            eventos
         });
 
     } catch (error) {
@@ -113,8 +111,7 @@ const eliminarEvento = async (req, res = response) => {
     const { uid, name } = req;
 
     try {
-       
-        await Evento.findByIdAndDelete(id);
+        const evento = await Evento.findById(id);
 
         if (!evento) {
             return res.status(404).json({
@@ -122,6 +119,15 @@ const eliminarEvento = async (req, res = response) => {
                 msg: 'evento no existe por ese id'
             });
         }
+
+        if (evento.user.toString() !== uid) {
+            return res.status(401).json({
+                ok: false,
+                msg: 'No tiene privilegio de eliminar este evento'
+            });
+        }
+       
+        await Evento.findByIdAndDelete(id);
 
         res.json({
             msg: 'delete ok ',

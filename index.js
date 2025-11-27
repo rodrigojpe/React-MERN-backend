@@ -23,7 +23,10 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/events', require('./routes/events'));
 
+app.use('*', (req, res) => {
+    res.sendFile(__dirname + '/public/index.html');
+});
 
-app.listen( process.env.PORT, () => {
+app.listen(process.env.PORT, () => {
     console.log('Server started on port 4000');
 });
